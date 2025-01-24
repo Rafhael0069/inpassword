@@ -6,10 +6,10 @@
 // Matriz representando um "V" de 'checked'
 int checked_pattern[MATRIX_SIZE][MATRIX_SIZE] = {
     {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1},
-    {0, 1, 0, 1, 0},
-    {0, 0, 1, 0, 0},
-    {0, 0, 0, 0, 0}
+    {0, 1, 0, 0, 0},
+    {0, 0, 1, 0, 1},
+    {0, 0, 0, 1, 0},
+    {1, 0, 0, 0, 0}
 };
 
 // Matriz representando um "X"
@@ -22,7 +22,6 @@ int x_pattern[MATRIX_SIZE][MATRIX_SIZE] = {
 };
 
 // Matrizes representando os números
-
 int number_0[MATRIX_SIZE][MATRIX_SIZE] = {
     {0, 1, 1, 1, 0},
     {0, 1, 0, 1, 0},

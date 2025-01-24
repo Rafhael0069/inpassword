@@ -19,6 +19,8 @@ volatile bool clear_matrix = false;           // Indica se a matriz deve ser apa
 int saved_numbers[MAX_NUMBERS];               // Lista de números salvos
 int saved_count = 0;                          // Quantidade de números salvos na lista
 
+const int predefined_password[MAX_NUMBERS] = {0, 0, 0, 0}; // Senha predefinida
+
 // Inicializa os botões configurando como entrada com pull-up
 void init_buttons() {
     gpio_init(BUTTON_A);
@@ -33,41 +35,35 @@ void init_buttons() {
 // Atualiza a matriz de LEDs para exibir o número atual
 void display_number_on_matrix(int number) {
     switch (number) {
-    case 0:
-        updateMatrix(number_0, 0, 0, matrix_brightness);
-        break;
-    case 1:
-        updateMatrix(number_1, 0, 0, matrix_brightness);
-        break;
-    case 2:
-        updateMatrix(number_2, 0, 0, matrix_brightness);
-        break;
-    case 3:
-        updateMatrix(number_3, 0, 0, matrix_brightness);
-        break;
-    case 4:
-        updateMatrix(number_4, 0, 0, matrix_brightness);
-        break;
-    case 5:
-        updateMatrix(number_5, 0, 0, matrix_brightness);
-        break;
-    case 6:
-        updateMatrix(number_6, 0, 0, matrix_brightness);
-        break;
-    case 7:
-        updateMatrix(number_7, 0, 0, matrix_brightness);
-        break;
-    case 8:
-        updateMatrix(number_8, 0, 0, matrix_brightness);
-        break;
-    case 9:
-        updateMatrix(number_9, 0, 0, matrix_brightness);
-        break;
-    default:
-        updateMatrix(number_0, 0, 0, matrix_brightness);
-        break;
+    case 0: updateMatrix(number_0, 0, 0, matrix_brightness); break;
+    case 1: updateMatrix(number_1, 0, 0, matrix_brightness); break;
+    case 2: updateMatrix(number_2, 0, 0, matrix_brightness); break;
+    case 3: updateMatrix(number_3, 0, 0, matrix_brightness); break;
+    case 4: updateMatrix(number_4, 0, 0, matrix_brightness); break;
+    case 5: updateMatrix(number_5, 0, 0, matrix_brightness); break;
+    case 6: updateMatrix(number_6, 0, 0, matrix_brightness); break;
+    case 7: updateMatrix(number_7, 0, 0, matrix_brightness); break;
+    case 8: updateMatrix(number_8, 0, 0, matrix_brightness); break;
+    case 9: updateMatrix(number_9, 0, 0, matrix_brightness); break;
+    default: updateMatrix(number_0, 0, 0, matrix_brightness); break;
     }
 }
+
+// Reinicia o estado do programa
+void reset_program_state() {
+    saved_count = 0;         // Reinicia o contador de números salvos
+    current_number = 0;      // Reinicia o ciclo de números
+    clear_matrix = true;     // Apaga a matriz temporariamente
+    memset(saved_numbers, 0, sizeof(saved_numbers)); // Limpa a lista de números salvos
+
+    // Atualiza o display OLED para o estado inicial
+    const char *message[] = {"Insira", "A senha"};
+    oled_display_message(message, 2);
+
+     // Limpa a matriz de LEDs
+    updateMatrix(x_pattern, 0, 0, 0);
+}
+
 
 // Mostra a lista de números salvos no display OLED
 void display_saved_numbers() {
@@ -90,6 +86,16 @@ void display_saved_numbers() {
     oled_display_message(message, 3); // Exibe a lista no display OLED
 }
 
+// Verifica se a lista de números salvos coincide com a senha predefinida
+bool is_password_correct() {
+    for (int i = 0; i < MAX_NUMBERS; i++) {
+        if (saved_numbers[i] != predefined_password[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Função chamada nas interrupções dos botões
 void button_callback(uint gpio, uint32_t events) {
     uint32_t current_time = to_ms_since_boot(get_absolute_time());
@@ -110,11 +116,22 @@ void button_callback(uint gpio, uint32_t events) {
             saved_numbers[saved_count++] = current_number;
         }
 
-        // Reinicia o ciclo de números
-        current_number = 0;
-
         // Exibe a lista de números salvos no OLED
         display_saved_numbers();
+
+        if (saved_count == MAX_NUMBERS) {
+            if (is_password_correct()) {
+                const char *message[] = {"Senha", "Correta"};
+                oled_display_message(message, 2);
+                updateMatrix(checked_pattern, 0, matrix_brightness, 0); // Exibe um "V" na matriz
+            } else {            
+                const char *message[] = {"Senha", "Incorreta"};
+                oled_display_message(message, 2);
+                updateMatrix(x_pattern, matrix_brightness, 0, 0); // Exibe um "X" na matriz
+            }
+            sleep_ms(3000);          // Espera 3 segundos antes de reiniciar
+            reset_program_state();   // Reinicia o estado do program
+        }
     }
 }
 
@@ -130,8 +147,7 @@ int main() {
     gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &button_callback);
     gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_FALL, true, &button_callback);
 
-    const char *message[] = {"Insira", "A senha"};
-    oled_display_message(message, 2);
+    reset_program_state(); // Inicializa o estado inicial
 
     while (1) {
         if (clear_matrix) {
