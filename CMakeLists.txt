@@ -35,10 +35,17 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(inpassword inpassword.c )
+add_executable(inpassword 
+            inpassword.c
+            matrix_control.c
+            oled_display.c 
+            inc/ssd1306_i2c.c)
 
 pico_set_program_name(inpassword "inpassword")
 pico_set_program_version(inpassword "0.1")
+
+# Generate PIO header
+pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/ws2818b.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(inpassword 0)
@@ -55,7 +62,9 @@ target_include_directories(inpassword PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(inpassword 
-        
+        hardware_pio
+        hardware_clocks
+        hardware_i2c
         )
 
 pico_add_extra_outputs(inpassword)
