@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "matrix_control.h"
@@ -9,11 +10,14 @@
 #define BUTTON_B 6 // Definição do pino para o botão B
 
 #define DEBOUNCE_TIME_MS 200 // Tempo para evitar bouncing nos botões
+#define MAX_NUMBERS 4       // Número máximo de números armazenados na lista
 
 const int matrix_brightness = 128;            // Brilho médio para LEDs da matriz
 volatile uint32_t last_button_press_time = 0; // Armazena o último tempo de acionamento do botão
 volatile int current_number = 0;              // Número atual exibido na matriz de LEDs
 volatile bool clear_matrix = false;           // Indica se a matriz deve ser apagada momentaneamente
+int saved_numbers[MAX_NUMBERS];               // Lista de números salvos
+int saved_count = 0;                          // Quantidade de números salvos na lista
 
 // Inicializa os botões configurando como entrada com pull-up
 void init_buttons() {
@@ -65,6 +69,27 @@ void display_number_on_matrix(int number) {
     }
 }
 
+// Mostra a lista de números salvos no display OLED
+void display_saved_numbers() {
+    char display_buffer[64];
+    memset(display_buffer, 0, sizeof(display_buffer));
+
+    // Constrói a string com os números salvos
+    if (saved_count == 0) {
+        snprintf(display_buffer, sizeof(display_buffer), "Lista vazia");
+    } else {
+        snprintf(display_buffer, sizeof(display_buffer), "");
+        for (int i = 0; i < saved_count; i++) {
+            char num_str[4];
+            snprintf(num_str, sizeof(num_str), " %d", saved_numbers[i]);
+            strncat(display_buffer, num_str, sizeof(display_buffer) - strlen(display_buffer) - 1);
+        }
+    }
+
+    const char *message[] = {"Salvos:", "  ", display_buffer};
+    oled_display_message(message, 3); // Exibe a lista no display OLED
+}
+
 // Função chamada nas interrupções dos botões
 void button_callback(uint gpio, uint32_t events) {
     uint32_t current_time = to_ms_since_boot(get_absolute_time());
@@ -79,11 +104,17 @@ void button_callback(uint gpio, uint32_t events) {
 
     if (gpio == BUTTON_A && gpio_get(BUTTON_A) == 0) {
         current_number = (current_number + 1) % 10; // Incrementa o número e reinicia após 9
-        const char *message[] = {"Botao A", "Pressionado"};
-        oled_display_message(message, 2); // Mostra mensagem no display OLED
     } else if (gpio == BUTTON_B && gpio_get(BUTTON_B) == 0) {
-        const char *message[] = {"Botao B", "Pressionado"};
-        oled_display_message(message, 2); // Mostra mensagem no display OLED
+        // Salva o número atual na lista
+        if (saved_count < MAX_NUMBERS) {
+            saved_numbers[saved_count++] = current_number;
+        }
+
+        // Reinicia o ciclo de números
+        current_number = 0;
+
+        // Exibe a lista de números salvos no OLED
+        display_saved_numbers();
     }
 }
 
@@ -99,6 +130,8 @@ int main() {
     gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL, true, &button_callback);
     gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_FALL, true, &button_callback);
 
+    const char *message[] = {"Insira", "A senha"};
+    oled_display_message(message, 2);
 
     while (1) {
         if (clear_matrix) {
