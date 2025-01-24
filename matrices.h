@@ -56,11 +56,11 @@ int number_3[MATRIX_SIZE][MATRIX_SIZE] = {
 };
 
 int number_4[MATRIX_SIZE][MATRIX_SIZE] = {
-    {0, 1, 0, 1, 0},
-    {0, 1, 0, 1, 0},
-    {0, 1, 1, 1, 0},
+    {0, 1, 0, 0, 0},
     {0, 0, 0, 1, 0},
-    {0, 0, 0, 1, 0}
+    {0, 1, 1, 1, 0},
+    {0, 1, 0, 1, 0},
+    {0, 1, 0, 1, 0}
 };
 
 int number_5[MATRIX_SIZE][MATRIX_SIZE] = {
@@ -73,18 +73,18 @@ int number_5[MATRIX_SIZE][MATRIX_SIZE] = {
 
 int number_6[MATRIX_SIZE][MATRIX_SIZE] = {
     {0, 1, 1, 1, 0},
-    {0, 0, 0, 1, 0},
-    {0, 1, 1, 1, 0},
     {0, 1, 0, 1, 0},
+    {0, 1, 1, 1, 0},
+    {0, 1, 0, 0, 0},
     {0, 1, 1, 1, 0}
 };
 
 int number_7[MATRIX_SIZE][MATRIX_SIZE] = {
-    {0, 1, 1, 1, 0},
+    {0, 1, 0, 0, 0},
     {0, 0, 0, 1, 0},
+    {0, 1, 0, 0, 0},
     {0, 0, 0, 1, 0},
-    {0, 0, 0, 1, 0},
-    {0, 0, 0, 1, 0}
+    {0, 1, 1, 1, 0}
 };
 
 int number_8[MATRIX_SIZE][MATRIX_SIZE] = {
@@ -97,10 +97,10 @@ int number_8[MATRIX_SIZE][MATRIX_SIZE] = {
 
 int number_9[MATRIX_SIZE][MATRIX_SIZE] = {
     {0, 1, 1, 1, 0},
-    {0, 1, 0, 1, 0},
-    {0, 1, 1, 1, 0},
     {0, 0, 0, 1, 0},
-    {0, 0, 0, 1, 0}
+    {0, 1, 1, 1, 0},
+    {0, 1, 0, 1, 0},
+    {0, 1, 1, 1, 0}
 };
 
 #endif // MATRICES_H
